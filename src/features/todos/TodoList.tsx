@@ -1,14 +1,31 @@
-import React from "react";
-import { useState } from "react";
-import { faTrash, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState } from "react";
+import { useAddTodoMutation, useGetTodosQuery } from "../api/apiSlice";
+import TodoItem from "./TodoItem";
 
 const TodoList = () => {
   const [newTodo, setNewTodo] = useState("");
+  const {
+    isError,
+    isLoading,
+    isSuccess,
+    data: todos,
+    error,
+  } = useGetTodosQuery();
+
+  const [addTodo] = useAddTodoMutation();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    addTodo({
+      id: Number(new Date()),
+      userId: 2,
+      title: newTodo,
+      completed: false,
+    });
     setNewTodo("");
+    console.log(Number(new Date()));
   };
 
   const newItemSection = (
@@ -31,6 +48,16 @@ const TodoList = () => {
   );
 
   let content;
+
+  if (isLoading) {
+    content = <p>Loading...</p>;
+  } else if (isSuccess) {
+    content = todos.map((todo) => {
+      return <TodoItem key={todo.id} todo={todo} />;
+    });
+  } else if (isError) {
+    content = <p>{JSON.stringify(error)}</p>;
+  }
 
   return (
     <main>
